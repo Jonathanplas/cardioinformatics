@@ -50,17 +50,17 @@ pd.DataFrame(drugtable(['ENSG00000157764']), columns=cols)
 containsid = False
 
 #for i in drugtable.itertuples():
-    #print (i)
+    #print (i) 
 
 #drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
 
 #drugtable.head()
 a=1
 import csv
-with open('efo_hp_tagsd.csv', 'r') as f:
+with open('efo_hp_tags.csv', 'r') as f:
     reader = csv.reader(f)
-    list_of_ESOs = list(reader) 
-    drugstring = ''.join(drugtable.iloc[a,7])
+    list_of_ESOs = list(reader)
+    drugstring = ''.join(drugtable(bcgenes).iloc[a,7])
     print("Drugstring:")
     print(drugstring)
     if drugstring in list_of_ESOs:
