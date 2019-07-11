@@ -1,0 +1,69 @@
+bcgenes = input('Enter Gene Name: ')
+import requests
+import numpy as np
+import pandas as pd
+#converting gene names to Ensembl ids
+import mygene
+mg = mygene.MyGeneInfo()
+mgres = mg.querymany(bcgenes, scopes='symbol,alias',fields='ensembl.gene', species='human')
+
+def drugtable(bcgenes):
+    drugfields = ['target.gene_info.symbol',
+                  'target.target_class',
+                  'evidence.target2drug.action_type',
+                  'disease.efo_info.label',
+                  'unique_association_fields.chembl_molecules','disease.id',
+                  'drug']
+    payload = {"target":bcgenes, 'datatype':['known_drug'],'fields':drugfields}
+    r = requests.post('https://platform-api.opentargets.io/v3/platform/public/evidence/filter',json=payload)
+
+    for e in r.json()['data']:
+        yield (e['target']['gene_info']['symbol'],
+              e['target']['target_class'][0],
+              e["unique_association_fields"]['chembl_molecules'],
+              e['evidence']['target2drug']['action_type'],
+              e['drug']['molecule_name'],
+              e['drug']['molecule_type'],
+              e['drug']["max_phase_for_all_diseases"]['numeric_index'],
+              e['disease']['id'],
+              e['disease']['efo_info']['label']
+              )
+
+bcgenes_ensg = []
+for x in mgres:
+    try:
+        bcgenes_ensg.append(x['ensembl']['gene'])
+    except KeyError:
+        pass
+    except TypeError:
+        bcgenes_ensg.append(x['ensembl'][0]['gene'])
+bcgenes_ensg[:3]
+
+genes_chunked = [bcgenes_ensg[i:i + 50] for i in range(0, len(bcgenes_ensg), 50)]
+
+cols = ['Target','Target Class','Chembl *ri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication']
+
+pd.DataFrame(drugtable(['ENSG00000157764']), columns=cols)
+
+#brafdrugs.drop_duplicates(subset=['target','chembl_uri','indication'],inplace=True) # drop duplicate evidence for each target-drug-indication combination
+
+containsid = False
+
+#for i in drugtable.itertuples():
+    #print (i)
+
+#drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
+
+#drugtable.head()
+a=1
+import csv
+with open('efo_hp_tagsd.csv', 'r') as f:
+    reader = csv.reader(f)
+    list_of_ESOs = list(reader) 
+    drugstring = ''.join(drugtable.iloc[a,7])
+    print("Drugstring:")
+    print(drugstring)
+    if drugstring in list_of_ESOs:
+        drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
+        drugtable.head()
+        a+=1
