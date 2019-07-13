@@ -55,4 +55,3 @@ with open('efo_hp_tags.csv', 'r') as f:
         if any (drugstring in s for s in list_of_EFOs):
             print("success")
             print(drugtable.head().iloc[a,:])
-            matchstring = drugtable.head().iloc[a,:]
