@@ -41,29 +41,18 @@ bcgenes_ensg[:3]
 
 genes_chunked = [bcgenes_ensg[i:i + 50] for i in range(0, len(bcgenes_ensg), 50)]
 
-cols = ['Target','Target Class','Chembl *ri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication']
+cols = ['Target','Target Class','Chembl Uri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication']
 
-pd.DataFrame(drugtable(['ENSG00000157764']), columns=cols)
-
-#brafdrugs.drop_duplicates(subset=['target','chembl_uri','indication'],inplace=True) # drop duplicate evidence for each target-drug-indication combination
-
-containsid = False
-
-#for i in drugtable.itertuples():
-    #print (i) 
-
-#drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
-
-#drugtable.head()
 a=1
+drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
+numrows = drugtable.head().shape[0]
 import csv
 with open('efo_hp_tags.csv', 'r') as f:
-    reader = csv.reader(f)
-    list_of_ESOs = list(reader)
-    drugstring = ''.join(drugtable(bcgenes).iloc[a,7])
-    print("Drugstring:")
-    print(drugstring)
-    if drugstring in list_of_ESOs:
-        drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
-        drugtable.head()
-        a+=1
+    for a in range(0, numrows):
+        reader = csv.reader(f)
+        list_of_EFOs = list(reader)
+        drugstring = drugtable.head().iloc[a,7]
+        if any (drugstring in s for s in list_of_EFOs):
+            print("success")
+            print(drugtable.head().iloc[a,:])
+            matchstring = drugtable.head().iloc[a,:]
