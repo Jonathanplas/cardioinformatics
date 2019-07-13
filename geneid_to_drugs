@@ -2,6 +2,7 @@ bcgenes = input('Enter Gene Name: ')
 import requests
 import numpy as np
 import pandas as pd
+import json
 #converting gene names to Ensembl ids
 import mygene
 mg = mygene.MyGeneInfo()
@@ -13,7 +14,7 @@ def drugtable(bcgenes):
                   'evidence.target2drug.action_type',
                   'disease.efo_info.label',
                   'unique_association_fields.chembl_molecules','disease.id',
-                  'drug']
+                  'drug','id']
     payload = {"target":bcgenes, 'datatype':['known_drug'],'fields':drugfields}
     r = requests.post('https://platform-api.opentargets.io/v3/platform/public/evidence/filter',json=payload)
 
@@ -26,7 +27,8 @@ def drugtable(bcgenes):
               e['drug']['molecule_type'],
               e['drug']["max_phase_for_all_diseases"]['numeric_index'],
               e['disease']['id'],
-              e['disease']['efo_info']['label']
+              e['disease']['efo_info']['label'],
+              e['id']
               )
 
 bcgenes_ensg = []
@@ -41,7 +43,7 @@ bcgenes_ensg[:3]
 
 genes_chunked = [bcgenes_ensg[i:i + 50] for i in range(0, len(bcgenes_ensg), 50)]
 
-cols = ['Target','Target Class','Chembl Uri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication']
+cols = ['Target','Target Class','Chembl Uri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication','ID']
 
 a=1
 drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
@@ -55,3 +57,5 @@ with open('efo_hp_tags.csv', 'r') as f:
         if any (drugstring in s for s in list_of_EFOs):
             print("success")
             print(drugtable.head().iloc[a,:])
+            drugtable.head().to_json(r'/Users/dauphin/Documents/kfile.json')
+
