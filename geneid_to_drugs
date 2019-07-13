@@ -57,5 +57,4 @@ with open('efo_hp_tags.csv', 'r') as f:
         if any (drugstring in s for s in list_of_EFOs):
             print("success")
             print(drugtable.head().iloc[a,:])
-            drugtable.head().to_json(r'/Users/dauphin/Documents/kfile.json')
-
+            drugtable.head().iloc[a,:].to_json(r'/Users/dauphin/Documents/kfile.json')
