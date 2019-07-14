@@ -45,21 +45,23 @@ genes_chunked = [bcgenes_ensg[i:i + 50] for i in range(0, len(bcgenes_ensg), 50)
 
 cols = ['Target','Target Class','Chembl Uri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication','ID']
 
-a=1
 drugtable = pd.concat([pd.DataFrame(drugtable(g), columns=cols) for g in genes_chunked])
 numrows = drugtable.head().shape[0]
 import csv
+fixbool = False
 with open('efo_hp_tags.csv', 'r') as f:
+    reader = csv.reader(f)
+    list_of_EFOs = list(reader)
+    print(list_of_EFOs)
     for a in range(0, numrows):
-        reader = csv.reader(f)
-        list_of_EFOs = list(reader)
         drugstring = drugtable.head().iloc[a,7]
         if any (drugstring in s for s in list_of_EFOs):
-            #print("success")
-            #print(drugtable.head().iloc[a,:])
+            print("success")
+            fixbool = True
+            print(drugtable.head().iloc[a,:])
             drugtable.head().iloc[a,:].to_json(r'/Users/dauphin/Documents/kfile.json')
-            dfObj = pd.DataFrame(columns=['Target','Target Class','Chembl Uri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication','ID'])
-            for i in range(0,numrows):
-                dfObj.loc[i] = drugtable.head().iloc[a,:]
-#print(dfObj.head())
-dfObj.head().to_json(r'/Users/dauphin/Documents/kfile.json')
+            #dfObj = pd.DataFrame(columns=['Target','Target Class','Chembl Uri','MOA','Molecule Name','Molecule Type','Phase','EFO','Indication','ID'])
+        else:
+            drugtable.drop([drugtable.head().iloc[a,:]])
+if fixbool == True:
+    drugtable.head().to_json(r'/Users/dauphin/Documents/kfile.json')
