@@ -14,8 +14,8 @@ def drugtable(bcgenes):
                   'disease.efo_info.label',
                   'unique_association_fields.chembl_molecules','disease.id',
                   'drug','id']
-    payload = {"target":bcgenes,'datatype':['known_drug'],'fields':drugfields}
-    r = requests.post('https://platform-api.opentargets.io/v3/platform/public/evidence/filter',params={"size":15},json=payload)
+    payload = {"target":bcgenes,'datatype':['known_drug'],'fields':drugfields,'size':35}
+    r = requests.post('https://platform-api.opentargets.io/v3/platform/public/evidence/filter',json=payload)
 
     for e in r.json()['data']:
         yield (e['target']['gene_info']['symbol'],
